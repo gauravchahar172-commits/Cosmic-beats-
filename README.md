@@ -22,9 +22,6 @@ https://gauravchahar172.github.io/Cosmic-beats-/
 3. Open in browser – search and play!
 
 ## Important Notes
-- Unofficial API for personal/educational use only
-- Not affiliated with JioSaavn
-- API may change in future
 
-Made with ❤️ by Gaurav (Delhi, India)  
+Made with ❤️ by Gaurav (Agra, India)  
 Star ⭐ if you like it!
