@@ -1,17 +1,18 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html><html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cosmic Beats</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet"><style>
+
 body{
 margin:0;
-font-family:Inter;
-background:#050510;
+background:#040410;
 color:white;
+font-family:Inter;
 overflow-x:hidden;
 }
 
-/* cosmic animated background */
+/* cosmic stars */
 
 body::before{
 content:"";
@@ -39,7 +40,7 @@ background:linear-gradient(135deg,#7c3aed,#d946ef);
 .banner{
 margin:15px;
 padding:20px;
-border-radius:14px;
+border-radius:15px;
 background:linear-gradient(135deg,#9333ea,#06b6d4);
 text-align:center;
 }
@@ -57,21 +58,21 @@ cursor:pointer;
 
 .song:hover{background:#1f2937}
 
-.artistGrid{
+.grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px;
 }
 
-.artist{
+.item{
 background:#1a1a2e;
-padding:14px;
-border-radius:12px;
-text-align:center;
+padding:12px;
+border-radius:10px;
 cursor:pointer;
+text-align:center;
 }
 
-.artist.selected{background:#7c3aed}
+.item.selected{background:#7c3aed}
 
 input{
 width:100%;
@@ -90,7 +91,6 @@ background:#0f0f1e;
 padding:10px;
 display:flex;
 justify-content:space-between;
-align-items:center;
 }
 
 .nav{
@@ -113,75 +113,117 @@ color:white;
 </style></head><body><header>Cosmic Beats</header><div class="banner">
 <h2>AI Music Discovery</h2>
 <p>Made by Gaurav Chahar</p>
-</div><!-- onboarding --><div id="onboard" class="page active"><h3>Select Artists You Like</h3><div class="artistGrid"><div class="artist" onclick="toggleArtist('Arijit Singh',this)">Arijit Singh</div>
-<div class="artist" onclick="toggleArtist('Badshah',this)">Badshah</div>
-<div class="artist" onclick="toggleArtist('AP Dhillon',this)">AP Dhillon</div>
-<div class="artist" onclick="toggleArtist('Shreya Ghoshal',this)">Shreya Ghoshal</div></div><br><button onclick="finishOnboarding()">Continue</button>
+</div><!-- GENRE SELECTION --><div id="genresPage" class="page active"><h3>Select Genres</h3><input id="genreSearch" placeholder="Search genre"><div id="genres" class="grid"></div><button onclick="nextArtists()">Next</button>
 
-</div><!-- home --><div id="home" class="page"><h3>🤖 AI Mix</h3>
-<div id="aiMix"></div><h3>📅 Daily Mix</h3>
-<div id="dailyMix"></div><h3>📆 Weekly Mix</h3>
-<div id="weeklyMix"></div><button onclick="generateAIMix()">🎲 Surprise Mix</button>
+</div><!-- ARTIST SELECTION --><div id="artistsPage" class="page"><h3>Select Artists (min 4)</h3><input id="artistSearch" placeholder="Search artist"><div id="artists" class="grid"></div><button onclick="finishSetup()">Continue</button>
 
-</div><!-- search --><div id="search" class="page"><input id="searchInput" placeholder="Search songs or artists"><div id="results"></div></div><!-- library --><div id="library" class="page"><h3>❤️ Liked Songs</h3>
-<div id="likedSongs"></div><h3>📚 Playlists</h3>
-<div id="playlists"></div></div><!-- profile --><div id="profile" class="page"><h3>Your Stats</h3>
-<p id="stats">Songs Played: 0</p></div><!-- player --><div class="player"><div id="nowPlaying">Nothing Playing</div><div>
+</div><!-- HOME --><div id="home" class="page"><h3>AI Daily Mix</h3>
+<div id="daily"></div><h3>AI Weekly Mix</h3>
+<div id="weekly"></div><h3>AI Monthly Mix</h3>
+<div id="monthly"></div><button onclick="generateMix()">🎲 Surprise Mix</button>
+
+</div><!-- SEARCH --><div id="search" class="page"><input id="searchInput" placeholder="Search songs"><div id="results"></div></div><!-- PROFILE --><div id="profile" class="page"><h3>Stats</h3>
+<p id="stats">Songs Played: 0</p></div><div class="player"><div id="nowPlaying">Nothing Playing</div><div>
 <button onclick="togglePlay()">Play</button>
 <button onclick="nextSong()">Next</button>
 </div></div><div class="nav"><button onclick="showPage('home')">Home</button>
 <button onclick="showPage('search')">Search</button>
-<button onclick="showPage('library')">Library</button>
 <button onclick="showPage('profile')">Profile</button>
 
 </div><audio id="audio"></audio>
 
 <script>
 
-let artists=[]
-let queue=[]
-let currentIndex=0
-let plays=0
-let liked=[]
-let playlists={}
+let genresList=[
+"Bollywood","Bhojpuri","Chill","Classical","Country","Dance","EDM","English Pop","Hip Hop","House","Indie","Instrumental","Jazz","K-Pop","Lo-Fi","Metal","Phonk","Pop","Punjabi","Rap","Rock","Tamil","Telugu","Trap","Trance"
+]
+
+let artistList=[
+"Arijit Singh","Shreya Ghoshal","Diljit Dosanjh","Sidhu Moosewala","AP Dhillon","Badshah","Honey Singh","Pritam","Armaan Malik","Neha Kakkar","Atif Aslam","KK","Sonu Nigam","Rahat Fateh Ali Khan","Guru Randhawa","Darshan Raval","Shubh","Karan Aujla","Navaan Sandhu","Jass Manak","Jubin Nautiyal","Anirudh","Ilaiyaraaja","A R Rahman","Vishal Mishra"
+]
+
+let selectedGenres=[]
+let selectedArtists=[]
 
 const audio=document.getElementById("audio")
 
-function toggleArtist(name,el){
+let queue=[]
+let currentIndex=0
+let plays=0
 
-if(artists.includes(name)){
-artists=artists.filter(a=>a!==name)
+function renderGenres(){
+
+let html=""
+
+genresList.forEach(g=>{
+html+=`<div class="item" onclick="toggleGenre('${g}',this)">${g}</div>`
+})
+
+document.getElementById("genres").innerHTML=html
+
+}
+
+function toggleGenre(g,el){
+
+if(selectedGenres.includes(g)){
+selectedGenres=selectedGenres.filter(x=>x!==g)
 el.classList.remove("selected")
 }else{
-artists.push(name)
+selectedGenres.push(g)
 el.classList.add("selected")
 }
 
 }
 
-function finishOnboarding(){
+function nextArtists(){
 
-localStorage.setItem("artists",JSON.stringify(artists))
+showPage("artistsPage")
+
+let html=""
+
+artistList.forEach(a=>{
+html+=`<div class="item" onclick="toggleArtist('${a}',this)">${a}</div>`
+})
+
+document.getElementById("artists").innerHTML=html
+
+}
+
+function toggleArtist(a,el){
+
+if(selectedArtists.includes(a)){
+selectedArtists=selectedArtists.filter(x=>x!==a)
+el.classList.remove("selected")
+}else{
+selectedArtists.push(a)
+el.classList.add("selected")
+}
+
+}
+
+function finishSetup(){
+
+localStorage.setItem("artists",JSON.stringify(selectedArtists))
 
 showPage("home")
 
-generateAIMix()
-generateDailyMix()
-generateWeeklyMix()
+generateMix()
 
 }
 
 async function fetchSongs(q){
 
 let res=await fetch(`https://saavn.dev/api/search/songs?query=${q}`)
+
 let data=await res.json()
+
 return data.data.results
 
 }
 
-async function generateAIMix(){
+async function generateMix(){
 
-let fav=JSON.parse(localStorage.getItem("artists"))||["arijit"]
+let fav=JSON.parse(localStorage.getItem("artists"))||["Arijit"]
 
 let artist=fav[Math.floor(Math.random()*fav.length)]
 
@@ -189,39 +231,9 @@ let songs=await fetchSongs(artist)
 
 queue=songs.slice(0,10)
 
-renderSongs("aiMix",queue)
-
-}
-
-async function generateDailyMix(){
-
-let today=new Date().toDateString()
-
-if(localStorage.getItem("daily")!==today){
-
-localStorage.setItem("daily",today)
-
-let songs=await fetchSongs("bollywood")
-
-renderSongs("dailyMix",songs.slice(0,8))
-
-}
-
-}
-
-async function generateWeeklyMix(){
-
-let week=Math.floor(Date.now()/604800000)
-
-if(localStorage.getItem("week")!=week){
-
-localStorage.setItem("week",week)
-
-let songs=await fetchSongs("top")
-
-renderSongs("weeklyMix",songs.slice(0,8))
-
-}
+renderSongs("daily",queue.slice(0,5))
+renderSongs("weekly",queue.slice(5,10))
+renderSongs("monthly",queue.slice(0,5))
 
 }
 
@@ -269,15 +281,6 @@ document.getElementById("nowPlaying").innerText=name
 plays++
 document.getElementById("stats").innerText="Songs Played: "+plays
 
-if('mediaSession' in navigator){
-
-navigator.mediaSession.metadata=new MediaMetadata({
-title:name,
-artist:"Cosmic Beats"
-})
-
-}
-
 }
 
 function nextSong(){
@@ -294,40 +297,20 @@ playSong(song.downloadUrl[4].url,song.name,currentIndex)
 
 function togglePlay(){
 
-if(audio.paused){
-audio.play()
-}else{
-audio.pause()
-}
+if(audio.paused)audio.play()
+else audio.pause()
 
 }
 
 function showPage(p){
 
 document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"))
+
 document.getElementById(p).classList.add("active")
 
 }
 
-document.addEventListener("visibilitychange",function(){
-
-if(!audio.paused){
-audio.play()
-}
-
-})
-
-Notification.requestPermission()
-
-setTimeout(()=>{
-
-if(Notification.permission==="granted"){
-
-new Notification("Cosmic Beats AI Mix Ready 🎧")
-
-}
-
-},6000)
+renderGenres()
 
 </script></body>
-                                   </html>
+  </html>
