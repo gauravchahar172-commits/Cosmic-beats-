@@ -6,28 +6,9 @@
 
 body{
 margin:0;
-background:#040410;
+background:#070714;
 color:white;
 font-family:Inter;
-overflow-x:hidden;
-}
-
-/* cosmic stars */
-
-body::before{
-content:"";
-position:fixed;
-width:200%;
-height:200%;
-background:radial-gradient(white 1px,transparent 1px);
-background-size:40px 40px;
-opacity:0.08;
-animation:stars 120s linear infinite;
-}
-
-@keyframes stars{
-from{transform:translate(0,0)}
-to{transform:translate(-500px,-500px)}
 }
 
 header{
@@ -38,41 +19,49 @@ background:linear-gradient(135deg,#7c3aed,#d946ef);
 }
 
 .banner{
-margin:15px;
-padding:20px;
-border-radius:15px;
+margin:10px;
+padding:16px;
+border-radius:12px;
 background:linear-gradient(135deg,#9333ea,#06b6d4);
 text-align:center;
 }
 
-.page{display:none;padding:16px}
+.page{display:none;padding:14px}
 .page.active{display:block}
 
-.song{
-background:#111827;
-padding:12px;
-margin-bottom:8px;
-border-radius:10px;
-cursor:pointer;
-}
-
-.song:hover{background:#1f2937}
-
-.grid{
+.genreGrid,.artistGrid{
 display:grid;
-grid-template-columns:1fr 1fr;
+grid-template-columns:repeat(2,1fr);
 gap:10px;
 }
 
-.item{
-background:#1a1a2e;
+.genre,.artist{
+background:#1b1b30;
 padding:12px;
 border-radius:10px;
-cursor:pointer;
 text-align:center;
+cursor:pointer;
 }
 
-.item.selected{background:#7c3aed}
+.genre.selected,.artist.selected{
+background:#7c3aed;
+}
+
+.artist img{
+width:100%;
+border-radius:8px;
+margin-bottom:5px;
+}
+
+.song{
+background:#121226;
+padding:10px;
+margin-bottom:8px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.song:hover{background:#1f1f3a}
 
 input{
 width:100%;
@@ -87,7 +76,7 @@ position:fixed;
 bottom:60px;
 left:0;
 right:0;
-background:#0f0f1e;
+background:#111125;
 padding:10px;
 display:flex;
 justify-content:space-between;
@@ -113,50 +102,50 @@ color:white;
 </style></head><body><header>Cosmic Beats</header><div class="banner">
 <h2>AI Music Discovery</h2>
 <p>Made by Gaurav Chahar</p>
-</div><!-- GENRE SELECTION --><div id="genresPage" class="page active"><h3>Select Genres</h3><input id="genreSearch" placeholder="Search genre"><div id="genres" class="grid"></div><button onclick="nextArtists()">Next</button>
+</div><!-- GENRES --><div id="genresPage" class="page active"><h3>Select Genres</h3><input id="genreSearch" placeholder="Search genre"><div id="genres" class="genreGrid"></div><button onclick="nextArtists()">Next</button>
 
-</div><!-- ARTIST SELECTION --><div id="artistsPage" class="page"><h3>Select Artists (min 4)</h3><input id="artistSearch" placeholder="Search artist"><div id="artists" class="grid"></div><button onclick="finishSetup()">Continue</button>
+</div><!-- ARTISTS --><div id="artistsPage" class="page"><h3>Select Artists</h3><input id="artistSearch" placeholder="Search artist"><div id="artists" class="artistGrid"></div><button onclick="finishSetup()">Continue</button>
 
-</div><!-- HOME --><div id="home" class="page"><h3>AI Daily Mix</h3>
-<div id="daily"></div><h3>AI Weekly Mix</h3>
-<div id="weekly"></div><h3>AI Monthly Mix</h3>
+</div><!-- HOME --><div id="home" class="page"><h3>Daily Mix</h3>
+<div id="daily"></div><h3>Weekly Mix</h3>
+<div id="weekly"></div><h3>Monthly Mix</h3>
 <div id="monthly"></div><button onclick="generateMix()">🎲 Surprise Mix</button>
 
-</div><!-- SEARCH --><div id="search" class="page"><input id="searchInput" placeholder="Search songs"><div id="results"></div></div><!-- PROFILE --><div id="profile" class="page"><h3>Stats</h3>
-<p id="stats">Songs Played: 0</p></div><div class="player"><div id="nowPlaying">Nothing Playing</div><div>
+</div><!-- SEARCH --><div id="search" class="page"><input id="searchInput" placeholder="Search songs"><div id="results"></div></div><!-- PLAYER --><div class="player"><div id="nowPlaying">Nothing Playing</div><div>
 <button onclick="togglePlay()">Play</button>
 <button onclick="nextSong()">Next</button>
 </div></div><div class="nav"><button onclick="showPage('home')">Home</button>
 <button onclick="showPage('search')">Search</button>
-<button onclick="showPage('profile')">Profile</button>
 
 </div><audio id="audio"></audio>
 
 <script>
 
-let genresList=[
-"Bollywood","Bhojpuri","Chill","Classical","Country","Dance","EDM","English Pop","Hip Hop","House","Indie","Instrumental","Jazz","K-Pop","Lo-Fi","Metal","Phonk","Pop","Punjabi","Rap","Rock","Tamil","Telugu","Trap","Trance"
+const genresList=[
+"Bollywood","Punjabi","Hip Hop","Rap","Pop","Rock","EDM","Phonk","Jazz","Classical",
+"Tamil","Telugu","Bhojpuri","LoFi","Instrumental","Trap","Dance","Indie","House"
 ]
 
-let artistList=[
-"Arijit Singh","Shreya Ghoshal","Diljit Dosanjh","Sidhu Moosewala","AP Dhillon","Badshah","Honey Singh","Pritam","Armaan Malik","Neha Kakkar","Atif Aslam","KK","Sonu Nigam","Rahat Fateh Ali Khan","Guru Randhawa","Darshan Raval","Shubh","Karan Aujla","Navaan Sandhu","Jass Manak","Jubin Nautiyal","Anirudh","Ilaiyaraaja","A R Rahman","Vishal Mishra"
+const artistsList=[
+"Arijit Singh","Shreya Ghoshal","Diljit Dosanjh","Sidhu Moosewala","AP Dhillon",
+"Badshah","Honey Singh","Pritam","Neha Kakkar","Sonu Nigam",
+"KK","Atif Aslam","Rahat Fateh Ali Khan","Guru Randhawa","Darshan Raval",
+"Karan Aujla","Shubh","Jubin Nautiyal","Armaan Malik","Anirudh"
 ]
 
 let selectedGenres=[]
 let selectedArtists=[]
-
-const audio=document.getElementById("audio")
-
 let queue=[]
 let currentIndex=0
-let plays=0
+
+const audio=document.getElementById("audio")
 
 function renderGenres(){
 
 let html=""
 
 genresList.forEach(g=>{
-html+=`<div class="item" onclick="toggleGenre('${g}',this)">${g}</div>`
+html+=`<div class="genre" onclick="toggleGenre('${g}',this)">${g}</div>`
 })
 
 document.getElementById("genres").innerHTML=html
@@ -181,8 +170,17 @@ showPage("artistsPage")
 
 let html=""
 
-artistList.forEach(a=>{
-html+=`<div class="item" onclick="toggleArtist('${a}',this)">${a}</div>`
+artistsList.forEach(a=>{
+
+let img=`https://source.unsplash.com/200x200/?${a},singer`
+
+html+=`
+<div class="artist" onclick="toggleArtist('${a}',this)">
+<img src="${img}">
+${a}
+</div>
+`
+
 })
 
 document.getElementById("artists").innerHTML=html
@@ -214,7 +212,6 @@ generateMix()
 async function fetchSongs(q){
 
 let res=await fetch(`https://saavn.dev/api/search/songs?query=${q}`)
-
 let data=await res.json()
 
 return data.data.results
@@ -231,9 +228,9 @@ let songs=await fetchSongs(artist)
 
 queue=songs.slice(0,10)
 
-renderSongs("daily",queue.slice(0,5))
-renderSongs("weekly",queue.slice(5,10))
-renderSongs("monthly",queue.slice(0,5))
+renderSongs("daily",queue.slice(0,3))
+renderSongs("weekly",queue.slice(3,6))
+renderSongs("monthly",queue.slice(6,9))
 
 }
 
@@ -277,9 +274,6 @@ audio.src=url
 audio.play()
 
 document.getElementById("nowPlaying").innerText=name
-
-plays++
-document.getElementById("stats").innerText="Songs Played: "+plays
 
 }
 
