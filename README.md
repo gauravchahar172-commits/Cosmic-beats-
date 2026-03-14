@@ -1,6 +1,6 @@
 # Cosmic Beats 🎧🌌
 
-A beautiful, free music streaming web app inspired by Spotify & Gaana, powered by **JioSaavn unofficial API** (320kbps streaming + downloads).
+A beautiful, free music streaming web app completly add free(320kbps streaming + downloads).
 
 ## Features
 - Real-time song search (Bollywood, Punjabi, English hits)
