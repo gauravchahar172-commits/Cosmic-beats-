@@ -1,154 +1,294 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cosmic Beats</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-<style>
-
+<title>Cosmic Beats</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet"><style>
 body{
 margin:0;
-font-family:'Inter',sans-serif;
-background:#06060f;
+font-family:Inter;
+background:#050510;
 color:white;
-display:flex;
-flex-direction:column;
-height:100vh;
+overflow-x:hidden;
+}
+
+/* cosmic animated background */
+
+body::before{
+content:"";
+position:fixed;
+width:200%;
+height:200%;
+background:radial-gradient(white 1px,transparent 1px);
+background-size:40px 40px;
+opacity:0.08;
+animation:stars 120s linear infinite;
+}
+
+@keyframes stars{
+from{transform:translate(0,0)}
+to{transform:translate(-500px,-500px)}
 }
 
 header{
+font-family:Orbitron;
+text-align:center;
+padding:18px;
+background:linear-gradient(135deg,#7c3aed,#d946ef);
+}
+
+.banner{
+margin:15px;
 padding:20px;
-font-family:'Orbitron',sans-serif;
-font-size:20px;
-background:linear-gradient(135deg,#8b5cf6,#d946ef);
+border-radius:14px;
+background:linear-gradient(135deg,#9333ea,#06b6d4);
 text-align:center;
 }
 
-.container{
-flex:1;
-overflow:auto;
-padding:20px;
-}
+.page{display:none;padding:16px}
+.page.active{display:block}
 
 .song{
-background:#161628;
-border-radius:12px;
+background:#111827;
 padding:12px;
-margin-bottom:12px;
-display:flex;
-align-items:center;
-gap:12px;
+margin-bottom:8px;
+border-radius:10px;
 cursor:pointer;
 }
 
-.song img{
-width:50px;
-height:50px;
+.song:hover{background:#1f2937}
+
+.artistGrid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+.artist{
+background:#1a1a2e;
+padding:14px;
+border-radius:12px;
+text-align:center;
+cursor:pointer;
+}
+
+.artist.selected{background:#7c3aed}
+
+input{
+width:100%;
+padding:10px;
+border:none;
 border-radius:8px;
-object-fit:cover;
-}
-
-.song:hover{
-background:#1e1e35;
-}
-
-.song-title{
-font-weight:600;
-}
-
-.song-artist{
-font-size:12px;
-color:#aaa;
+margin-bottom:10px;
 }
 
 .player{
 position:fixed;
-bottom:0;
+bottom:60px;
 left:0;
 right:0;
 background:#0f0f1e;
-padding:12px;
+padding:10px;
 display:flex;
-align-items:center;
 justify-content:space-between;
-border-top:1px solid rgba(255,255,255,0.1);
+align-items:center;
 }
 
-.controls button{
-background:linear-gradient(135deg,#8b5cf6,#d946ef);
+.nav{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+display:flex;
+background:#111;
+}
+
+.nav button{
+flex:1;
+padding:14px;
 border:none;
+background:none;
 color:white;
-padding:10px 14px;
-border-radius:20px;
-cursor:pointer;
 }
 
-</style>
-</head>
+</style></head><body><header>Cosmic Beats</header><div class="banner">
+<h2>AI Music Discovery</h2>
+<p>Made by Gaurav Chahar</p>
+</div><!-- onboarding --><div id="onboard" class="page active"><h3>Select Artists You Like</h3><div class="artistGrid"><div class="artist" onclick="toggleArtist('Arijit Singh',this)">Arijit Singh</div>
+<div class="artist" onclick="toggleArtist('Badshah',this)">Badshah</div>
+<div class="artist" onclick="toggleArtist('AP Dhillon',this)">AP Dhillon</div>
+<div class="artist" onclick="toggleArtist('Shreya Ghoshal',this)">Shreya Ghoshal</div></div><br><button onclick="finishOnboarding()">Continue</button>
 
-<body>
+</div><!-- home --><div id="home" class="page"><h3>🤖 AI Mix</h3>
+<div id="aiMix"></div><h3>📅 Daily Mix</h3>
+<div id="dailyMix"></div><h3>📆 Weekly Mix</h3>
+<div id="weeklyMix"></div><button onclick="generateAIMix()">🎲 Surprise Mix</button>
 
-<header>Cosmic Beats</header>
+</div><!-- search --><div id="search" class="page"><input id="searchInput" placeholder="Search songs or artists"><div id="results"></div></div><!-- library --><div id="library" class="page"><h3>❤️ Liked Songs</h3>
+<div id="likedSongs"></div><h3>📚 Playlists</h3>
+<div id="playlists"></div></div><!-- profile --><div id="profile" class="page"><h3>Your Stats</h3>
+<p id="stats">Songs Played: 0</p></div><!-- player --><div class="player"><div id="nowPlaying">Nothing Playing</div><div>
+<button onclick="togglePlay()">Play</button>
+<button onclick="nextSong()">Next</button>
+</div></div><div class="nav"><button onclick="showPage('home')">Home</button>
+<button onclick="showPage('search')">Search</button>
+<button onclick="showPage('library')">Library</button>
+<button onclick="showPage('profile')">Profile</button>
 
-<div class="container">
-
-<div class="song" onclick="playSong('song1')">
-<img src="https://picsum.photos/200">
-<div>
-<div class="song-title">Galaxy Drift</div>
-<div class="song-artist">Cosmic AI</div>
-</div>
-</div>
-
-<div class="song" onclick="playSong('song2')">
-<img src="https://picsum.photos/201">
-<div>
-<div class="song-title">Nebula Nights</div>
-<div class="song-artist">Cosmic AI</div>
-</div>
-</div>
-
-<div class="song" onclick="playSong('song3')">
-<img src="https://picsum.photos/202">
-<div>
-<div class="song-title">Starlight Echo</div>
-<div class="song-artist">Cosmic AI</div>
-</div>
-</div>
-
-</div>
-
-<div class="player">
-
-<div id="nowPlaying">Nothing Playing</div>
-
-<div class="controls">
-<button onclick="togglePlay()">Play / Pause</button>
-</div>
-
-</div>
-
-<audio id="audio"></audio>
+</div><audio id="audio"></audio>
 
 <script>
 
-const songs={
-song1:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-song2:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-song3:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-}
+let artists=[]
+let queue=[]
+let currentIndex=0
+let plays=0
+let liked=[]
+let playlists={}
 
 const audio=document.getElementById("audio")
 
-function playSong(song){
+function toggleArtist(name,el){
 
-audio.src=songs[song]
+if(artists.includes(name)){
+artists=artists.filter(a=>a!==name)
+el.classList.remove("selected")
+}else{
+artists.push(name)
+el.classList.add("selected")
+}
+
+}
+
+function finishOnboarding(){
+
+localStorage.setItem("artists",JSON.stringify(artists))
+
+showPage("home")
+
+generateAIMix()
+generateDailyMix()
+generateWeeklyMix()
+
+}
+
+async function fetchSongs(q){
+
+let res=await fetch(`https://saavn.dev/api/search/songs?query=${q}`)
+let data=await res.json()
+return data.data.results
+
+}
+
+async function generateAIMix(){
+
+let fav=JSON.parse(localStorage.getItem("artists"))||["arijit"]
+
+let artist=fav[Math.floor(Math.random()*fav.length)]
+
+let songs=await fetchSongs(artist)
+
+queue=songs.slice(0,10)
+
+renderSongs("aiMix",queue)
+
+}
+
+async function generateDailyMix(){
+
+let today=new Date().toDateString()
+
+if(localStorage.getItem("daily")!==today){
+
+localStorage.setItem("daily",today)
+
+let songs=await fetchSongs("bollywood")
+
+renderSongs("dailyMix",songs.slice(0,8))
+
+}
+
+}
+
+async function generateWeeklyMix(){
+
+let week=Math.floor(Date.now()/604800000)
+
+if(localStorage.getItem("week")!=week){
+
+localStorage.setItem("week",week)
+
+let songs=await fetchSongs("top")
+
+renderSongs("weeklyMix",songs.slice(0,8))
+
+}
+
+}
+
+function renderSongs(container,songs){
+
+let html=""
+
+songs.forEach((song,i)=>{
+
+html+=`
+<div class="song" onclick="playSong('${song.downloadUrl[4].url}','${song.name}',${i})">
+${song.name} - ${song.primaryArtists}
+</div>
+`
+
+})
+
+document.getElementById(container).innerHTML=html
+
+}
+
+async function searchSongs(q){
+
+let songs=await fetchSongs(q)
+
+renderSongs("results",songs.slice(0,10))
+
+}
+
+document.getElementById("searchInput").addEventListener("input",function(){
+
+searchSongs(this.value)
+
+})
+
+function playSong(url,name,i){
+
+currentIndex=i||0
+
+audio.src=url
 audio.play()
 
-document.getElementById("nowPlaying").innerText="Now Playing: "+song
+document.getElementById("nowPlaying").innerText=name
+
+plays++
+document.getElementById("stats").innerText="Songs Played: "+plays
+
+if('mediaSession' in navigator){
+
+navigator.mediaSession.metadata=new MediaMetadata({
+title:name,
+artist:"Cosmic Beats"
+})
+
+}
+
+}
+
+function nextSong(){
+
+currentIndex++
+
+if(currentIndex>=queue.length)currentIndex=0
+
+let song=queue[currentIndex]
+
+playSong(song.downloadUrl[4].url,song.name,currentIndex)
 
 }
 
@@ -162,7 +302,32 @@ audio.pause()
 
 }
 
-</script>
+function showPage(p){
 
-</body>
-</html>
+document.querySelectorAll(".page").forEach(e=>e.classList.remove("active"))
+document.getElementById(p).classList.add("active")
+
+}
+
+document.addEventListener("visibilitychange",function(){
+
+if(!audio.paused){
+audio.play()
+}
+
+})
+
+Notification.requestPermission()
+
+setTimeout(()=>{
+
+if(Notification.permission==="granted"){
+
+new Notification("Cosmic Beats AI Mix Ready 🎧")
+
+}
+
+},6000)
+
+</script></body>
+                                   </html>
