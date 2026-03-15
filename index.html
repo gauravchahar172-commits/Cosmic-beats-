@@ -1,356 +1,39 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cosmic Beats</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter&display=swap" rel="stylesheet"><style>
+<meta charset="UTF-8">
+<title>Cosmic Beats</title>
+<link rel="stylesheet" href="style.css">
+</head>
 
-body{
-margin:0;
-font-family:Inter;
-color:white;
-background:#050510;
-overflow-x:hidden;
-}
+<body>
 
-canvas{
-position:fixed;
-top:0;
-left:0;
-z-index:-1;
-}
+<canvas id="galaxy"></canvas>
 
-header{
-text-align:center;
-padding:16px;
-font-family:Orbitron;
-background:linear-gradient(135deg,#7c3aed,#06b6d4);
-}
+<header>
+<h1>Cosmic Beats</h1>
+<p class="credit">Made by Gaurav Chahar</p>
 
-.banner{
-text-align:center;
-font-size:13px;
-background:#111;
-padding:5px;
-}
+<input id="searchInput" placeholder="Search songs or artists">
+<button onclick="searchSongs()">Search</button>
+</header>
 
-.page{
-display:none;
-padding:16px;
-}
+<section id="genres"></section>
+<section id="songs"></section>
 
-.page.active{
-display:block;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-}
-
-.card{
-background:rgba(30,30,60,0.6);
-backdrop-filter:blur(8px);
-padding:12px;
-border-radius:12px;
-text-align:center;
-cursor:pointer;
-transition:0.25s;
-}
-
-.card:hover{
-transform:scale(1.05);
-box-shadow:0 0 10px #7c3aed;
-}
-
-.card.selected{
-background:#7c3aed;
-}
-
-.artist img{
-width:100%;
-border-radius:8px;
-margin-bottom:6px;
-}
-
-.song{
-background:rgba(20,20,40,0.7);
-padding:10px;
-border-radius:8px;
-margin-bottom:8px;
-cursor:pointer;
-}
-
-.song:hover{
-background:#7c3aed;
-}
-
-input{
-width:100%;
-padding:10px;
-border:none;
-border-radius:8px;
-margin-bottom:10px;
-}
-
-button{
-padding:12px;
-border:none;
-border-radius:10px;
-background:#7c3aed;
-color:white;
-width:100%;
-margin-top:8px;
-font-size:15px;
-}
-
-.player{
-position:fixed;
-bottom:60px;
-left:0;
-right:0;
-background:#111125;
-padding:10px;
-display:none;
-justify-content:space-between;
-}
-
-.nav{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-display:flex;
-background:#000;
-}
-
-.nav button{
-flex:1;
-background:none;
-color:white;
-}
-
-</style></head><body><canvas id="galaxy"></canvas>
-
-<header>Cosmic Beats</header>
-<div class="banner">Made by Gaurav Chahar</div><div id="welcome" class="page active"><h2>AI Music Galaxy</h2>
-<p>Your taste powers the AI.</p><button onclick="showPage('artists')">Start Listening</button>
-
-</div><div id="artists" class="page"><h3>Select Artists You Like</h3><div id="artistList" class="grid"></div><button onclick="finishSetup()">Continue</button>
-
-</div><div id="home" class="page"><h3>AI Daily Mix</h3>
-<div id="daily"></div><h3>AI Discovery</h3>
-<div id="discover"></div><h3>Trending</h3>
-<div id="trending"></div><button onclick="generateMix()">🔀 New AI Mix</button>
-
-</div><div id="search" class="page"><input id="searchInput" placeholder="Search songs"><div id="results"></div></div><div id="player" class="player"><div id="nowPlaying">Playing</div><div>
-<button onclick="togglePlay()">Play</button>
-<button onclick="nextSong()">Next</button>
-</div></div><div class="nav"><button onclick="showPage('home')">Home</button>
-<button onclick="showPage('search')">Search</button>
-
-</div><audio id="audio"></audio>
-
-<script>
-
-/* galaxy animation */
-
-const canvas=document.getElementById("galaxy")
-const ctx=canvas.getContext("2d")
-
-canvas.width=window.innerWidth
-canvas.height=window.innerHeight
-
-let stars=[]
-
-for(let i=0;i<120;i++){
-stars.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-size:Math.random()*2
-})
-}
-
-function animateGalaxy(){
-
-ctx.clearRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="white"
-
-stars.forEach(s=>{
-ctx.fillRect(s.x,s.y,s.size,s.size)
-s.y+=0.2
-if(s.y>canvas.height)s.y=0
-})
-
-requestAnimationFrame(animateGalaxy)
-
-}
-
-animateGalaxy()
-
-/* music logic */
-
-const artists=[
-"Arijit Singh","Shreya Ghoshal","Diljit Dosanjh",
-"Sidhu Moosewala","AP Dhillon","Badshah",
-"Honey Singh","Pritam","Sonu Nigam",
-"Atif Aslam","Guru Randhawa","Karan Aujla"
-]
-
-let selectedArtists=[]
-let queue=[]
-let history=[]
-
-const audio=document.getElementById("audio")
-const player=document.getElementById("player")
-
-function renderArtists(){
-
-let html=""
-
-artists.forEach(a=>{
-
-let img=`https://source.unsplash.com/300x300/?${a},singer`
-
-html+=`
-<div class="card artist" onclick="toggleArtist('${a}',this)">
-<img src="${img}">
-${a}
+<div id="player">
+<img id="cover">
+<div>
+<h3 id="title"></h3>
+<p id="artist"></p>
 </div>
-`
 
-})
-
-document.getElementById("artistList").innerHTML=html
-
-}
-
-function toggleArtist(a,el){
-
-el.classList.toggle("selected")
-
-if(selectedArtists.includes(a)){
-selectedArtists=selectedArtists.filter(x=>x!==a)
-}else{
-selectedArtists.push(a)
-}
-
-}
-
-function finishSetup(){
-
-localStorage.setItem("taste",JSON.stringify(selectedArtists))
-
-showPage("home")
-
-generateMix()
-loadTrending()
-
-}
-
-async function fetchSongs(q){
-
-let r=await fetch(`https://saavn.dev/api/search/songs?query=${q}`)
-let j=await r.json()
-
-return j.data.results
-
-}
-
-async function generateMix(){
-
-let taste=JSON.parse(localStorage.getItem("taste"))||["Arijit"]
-
-let artist=taste[Math.floor(Math.random()*taste.length)]
-
-let songs=await fetchSongs(artist)
-
-queue=songs.slice(0,10)
-
-renderSongs("daily",queue.slice(0,4))
-renderSongs("discover",queue.slice(4,8))
-
-}
-
-async function loadTrending(){
-
-let songs=await fetchSongs("trending")
-
-renderSongs("trending",songs.slice(0,6))
-
-}
-
-function renderSongs(container,songs){
-
-let html=""
-
-songs.forEach((s,i)=>{
-
-html+=`
-<div class="song" onclick="playSong('${s.downloadUrl[4].url}','${s.name}',${i})">
-${s.name} - ${s.primaryArtists}
+<button onclick="togglePlay()">Play / Pause</button>
 </div>
-`
 
-})
+<script src="app.js"></script>
+<script src="player.js"></script>
+<script src="galaxy.js"></script>
 
-document.getElementById(container).innerHTML=html
-
-}
-
-function playSong(url,name,i){
-
-audio.src=url
-audio.play()
-
-player.style.display="flex"
-
-document.getElementById("nowPlaying").innerText=name
-
-history.push(name)
-
-}
-
-function nextSong(){
-
-let i=Math.floor(Math.random()*queue.length)
-
-let s=queue[i]
-
-playSong(s.downloadUrl[4].url,s.name,i)
-
-}
-
-function togglePlay(){
-
-if(audio.paused)audio.play()
-else audio.pause()
-
-}
-
-async function searchSongs(q){
-
-if(!q)return
-
-let songs=await fetchSongs(q)
-
-renderSongs("results",songs.slice(0,10))
-
-}
-
-document.getElementById("searchInput").addEventListener("input",function(){
-searchSongs(this.value)
-})
-
-function showPage(p){
-
-document.querySelectorAll(".page").forEach(pg=>pg.classList.remove("active"))
-
-document.getElementById(p).classList.add("active")
-
-}
-
-renderArtists()
-
-</script></body>
-                                         </html>
+</body>
+</html>
