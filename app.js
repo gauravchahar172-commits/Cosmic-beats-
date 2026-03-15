@@ -1,3 +1,15 @@
+fetch("data/genres.json")
+  .then(response => response.json())
+  .then(genres => {
+      const container = document.getElementById("genre-container");
+      genres.forEach(genre => {
+          const btn = document.createElement("button");
+          btn.textContent = genre;
+          btn.classList.add("genre-btn");
+          container.appendChild(btn);
+      });
+  })
+  .catch(err => console.error("Error loading genres:", err));
 const genres = [
 "Hindi","Punjabi","Phonk","Hip Hop",
 "EDM","Pop","Rock","LoFi","Tamil","Telugu"
